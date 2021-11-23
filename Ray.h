@@ -6,7 +6,7 @@
 class Ray {
 public:
     Ray() = default;
-    Ray(const P3& origin, const V3& direction) : orig(origin), dir(direction) {};
+    Ray(const P3& origin, const V3& direction) : orig(origin), dir(unit(direction)) {};
     [[nodiscard]] P3 origin() const {return orig;}
     [[nodiscard]] V3 direction() const {return dir;}
     P3 operator()(double time) const {

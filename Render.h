@@ -34,7 +34,7 @@ void render(Camera cam, Scene scene) {
                         auto light_vector = (source->_position - r(t));
                         //auto light_intensity = source->_intensity / (light_vector.length() * light_vector.length());
                         double light_intensity = dot(unit(light_vector), unit(normal));
-                        pixel_color = object->_color * light_intensity;
+                        pixel_color = object->_color * fabs(light_intensity);
                     }
                 }
             }
