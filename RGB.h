@@ -11,4 +11,5 @@ void write_RGB(std::ostream& out, RGB rgb) {
         << static_cast<int>(255.999 * rgb.z()) << '\n';
 }
 
+
 #endif //RTSIM_RGB_H
