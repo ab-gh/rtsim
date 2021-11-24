@@ -42,6 +42,7 @@ public:
             if (root < min || max < root) {
                 root = (-b_div_2 + sqrt_discriminant) / a;
                 if (root < min || max < root) {
+                    // No Hit
                     return -1.0;
                 }
             }
