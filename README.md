@@ -1,30 +1,27 @@
 # rtsim
 C++ implementation of a ray tracing simulator
 
-## wip
+## Features
 
-- [ ] Vector base class
-  - Basic 3d vector class
-  - Vector operations
-  - Vector operations
 - [ ] Objects
-  - Base class abstract
-  - Sphere
-  - Cube
-  - ...
-- [ ] Viewports
-  - Pixels
-  - Rays
-- [ ] Sources
-  - Point source
-  - ...
-- [ ] Cameras
-  - An eye
-- [ ] Scenes
-  - Objects and placement
-  - Viewport
-  - Camera
-  - Sources
-- [ ] Renderer
-  - Intersections
-  - Depth (inverse square)
+  - [x] Spheres
+  - [ ] Planes
+  - [ ] Triangles
+  - [ ] Cuboids
+- [ ] Materials
+  - [x] Reflectivity parameters
+  - [ ] Emissive
+  - [ ] Refractive
+- [ ] Light sources
+  - [x] Point light
+  - [ ] Emissive
+- [ ] Scene illumination
+  - [x] Ambient (constant)
+  - [x] Diffuse
+  - [x] Specular
+  - [ ] Reflection
+  - [ ] Refraction
+  - [ ] Global Illumination
+- [ ] Rendering
+  - [ ] Free camera
+  - [ ] Anti-aliasing

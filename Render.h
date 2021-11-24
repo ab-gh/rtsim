@@ -1,8 +1,7 @@
 #ifndef RTSIM_RENDER_H
 #define RTSIM_RENDER_H
 
-#define DIFFUSE_COEF 0.4
-#define SPECULAR_COEF 0.6
+#define AMBIENT_COEF 0.05
 
 #define INFTY 1e10
 
@@ -59,8 +58,15 @@ void render(Camera cam, Scene scene) {
             Ray r(cam.origin, cam.lower_left_corner + u * cam.horizontal + v * cam.vertical - cam.origin);
             RGB pixel_color(0, 0, 0);
             auto hit_list = hitList(r, scene);
-            Object* object = max_element(hit_list.begin(), hit_list.end(), hit_list.value_comp())->first;
-            double t = max_element(hit_list.begin(), hit_list.end(), hit_list.value_comp())->second;
+            using Iter = std::map<Object*, double>::iterator;
+            // TODO: fix crash on empty scene
+            auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
+                auto l = lhs.second < 0 ? numeric_limits<double>::max() : lhs.second;
+                auto r = rhs.second < 0 ? numeric_limits<double>::max() : rhs.second;
+                return l < r;
+            });
+            Object* object = it->first;
+            double t = it->second;
             if (t > 0.0) {
                 //V3 p = r(t);
                 V3 normal = unit(r(t) - object->_position);
@@ -68,10 +74,11 @@ void render(Camera cam, Scene scene) {
                     // Specular
                     auto light_vector = (source->_position - r(t));
                     auto reflection_ray = unit(reflect(r(t),normal));
-                    double specular_intensity = SPECULAR_COEF * specular(reflection_ray, light_vector);
+                    double specular_intensity = object->_reflectivity * specular(reflection_ray, light_vector);
                     // Diffuse
-                    double diffuse_intensity = DIFFUSE_COEF * diffuse(normal, light_vector);
-                    pixel_color = specular_intensity * object->_color + diffuse_intensity * object->_color + 0.2 * object->_color;
+                    double diffuse_intensity = (1-object->_reflectivity) * diffuse(normal, light_vector);
+                    double ambient_intensity = AMBIENT_COEF;
+                    pixel_color += ((source->_intensity * (specular_intensity + diffuse_intensity)) + ambient_intensity) * object->_color;
                 }
             }
             write_RGB(output, pixel_color);

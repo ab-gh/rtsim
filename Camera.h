@@ -11,7 +11,7 @@ class Camera {
 public:
     Camera() {
         this->aspect_ratio = 16.0/9.0;
-        this->image_width = 400;
+        this->image_width = 1000;
         this->image_height = static_cast<int>(this->image_width / this->aspect_ratio);
 
         this->viewport_height = 2.0;

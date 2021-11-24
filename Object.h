@@ -13,16 +13,18 @@ public:
 public:
     V3 _position;
     RGB _color;
+    double _reflectivity;
 };
 
 class Sphere : public Object {
 private:
     double _radius;
 public:
-    Sphere(V3 position, double radius, RGB colour) {
+    Sphere(V3 position, double radius, RGB colour, double reflectivity) : Object() {
         this->_position = position;
         this->_radius = radius;
         this->_color = colour;
+        this->_reflectivity = reflectivity;
     }
     virtual ~Sphere() = default;
     double intersect(const Ray &ray, double min, double max) const {
