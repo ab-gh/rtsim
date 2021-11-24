@@ -9,7 +9,7 @@ class Object {
 public:
     Object() = default;
     virtual ~Object() = default;
-    virtual double intersect(const Ray &ray/*, Vector &point, Vector &normal*/) const = 0;
+    virtual double intersect(const Ray &ray, double min, double max) const = 0;
 public:
     V3 _position;
     RGB _color;
@@ -25,16 +25,25 @@ public:
         this->_color = colour;
     }
     virtual ~Sphere() = default;
-    double intersect(const Ray &ray/*, double &t, V3 &normal, V3 &color*/) const {
+    double intersect(const Ray &ray, double min, double max) const {
         V3 oc = ray.origin() - _position;
         auto a = dot(ray.direction(), ray.direction());
-        auto b = 2.0 * dot(oc, ray.direction());
-        auto c = dot(oc, oc) - _radius * _radius;
-        auto discriminant = b * b - 4 * a * c;
+        auto b_div_2 = dot(oc, ray.direction());
+        auto c = powf(oc.length(), 2) - _radius * _radius;
+        auto discriminant = b_div_2 * b_div_2 - a * c;
         if (discriminant < 0) {
+            // No Hit
             return -1.0;
         } else {
-            return (-b - sqrt(discriminant) / (2.0 * a));
+            auto sqrt_discriminant = sqrt(discriminant);
+            auto root = (-b_div_2 - sqrt_discriminant) / a;
+            if (root < min || max < root) {
+                root = (-b_div_2 + sqrt_discriminant) / a;
+                if (root < min || max < root) {
+                    return -1.0;
+                }
+            }
+            return root;
         }
     }
 
