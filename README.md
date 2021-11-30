@@ -22,6 +22,8 @@ render(Camera cam, scn);
   - [ ] Planes
   - [ ] Triangles
   - [ ] Cuboids
+  - [ ] Cylinders
+  - [ ] Cone
 - [ ] Materials
   - [x] Reflectivity parameters
   - [ ] Emissive
