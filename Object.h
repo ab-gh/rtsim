@@ -72,7 +72,7 @@ public:
     }
     double intersect(const Ray &ray, double min, double max) const {
         auto denom = dot(unit(ray.direction()), unit(_normal));
-        auto dist = dot(unit(_position - ray.origin()), unit(_normal)) / denom;
+        auto dist = dot(_position - ray.origin(), unit(_normal)) / denom;
         if (dist < min || max < dist) {
             return -1.0;
         }

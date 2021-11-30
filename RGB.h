@@ -12,9 +12,9 @@ double clamp (double x, double min, double max) {
 }
 
 void write_RGB(std::ostream& out, RGB rgb) {
-    out << static_cast<int>(255.999 * clamp(rgb.x(), 0.0, 0.999)) << ' '
-        << static_cast<int>(255.999 * clamp(rgb.y(), 0.0, 0.999)) << ' '
-        << static_cast<int>(255.999 * clamp(rgb.z(), 0.0, 0.999)) << '\n';
+    out << static_cast<int>(255.0 * clamp(rgb.x(), 0.0, 0.999)) << ' '
+        << static_cast<int>(255.0 * clamp(rgb.y(), 0.0, 0.999)) << ' '
+        << static_cast<int>(255.0 * clamp(rgb.z(), 0.0, 0.999)) << '\n';
 }
 
 
