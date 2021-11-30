@@ -2,15 +2,20 @@
 C++ implementation of a ray tracing simulator
 
 ```cpp
+Camera cam;
 Scene scn;
-scn.addObject(new Sphere(Vector(.5, .5, -5 ), 2, RGB(0, 0, 1), 0.3));
-scn.addObject(new Sphere(Vector(.2, -.2, -1), .1, RGB(1, 0, 0), 0.3));
-scn.addObject(new Sphere(Vector(-1, 0, -3), .7, RGB(0, 1, 0), 1.0));
+int recursion_depth = 5;
 
-scn.addSource(new Source(Vector(0, 5, -1), 1));
-scn.addSource(new Source(Vector(7, -5, -1), .2));
+scn.addObject(new Sphere(Vector(-1, -1, -4), 1, RGB(1, 0, 0), 0.1));
+scn.addObject(new Sphere(Vector(0, -1.8, -3.9), 0.2, RGB(0, 1, 0), 0.3));
+scn.addObject(new Cone(Vector(1, 0.5, -5.3), Vector(1, -2, -5.3), 1.3, RGB(0.5, 0.7, 1), 0.9));
 
-render(Camera cam, scn);
+scn.addObject(new InfinitePlane(Vector(0, -2, 0), Vector(0, 1, 0), RGB(0.5, 0.6, 0.7), 0.1));
+
+scn.addSource(new Source(Vector(-1, 5, -2.5), 0.8));
+scn.addSource(new Source(Vector(0, 0, 1), 0.00001));
+
+render(cam, scn, recursion_depth);
 ```
 
 ![](https://raw.githubusercontent.com/ab-gh/rtsim/main/docs/demo.png)
