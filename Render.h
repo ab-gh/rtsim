@@ -19,7 +19,7 @@
 using namespace std;
 
 // Prototype
-RGB intensity(Scene, Ray, RGB);
+RGB intensity(Scene, Ray, RGB, int);
 
 // Track what objects the ray line will hit
 auto hitList(Ray ray, Scene scene) {
@@ -57,7 +57,7 @@ double diffuse(V3 normal_ray, V3 source_ray) {
 }
 
 // Reflected light
-RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_color) {
+RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_color, int recursion_depth) {
     Ray reflected_ray(reflection_point, reflection_ray);
     auto hit_list = hitList(reflected_ray, scene);
     auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
@@ -70,13 +70,17 @@ RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_col
     double t = it->second;
     // If an object is not hit, return black
     if (t > 0) {
-        return intensity(scene, reflected_ray, pixel_color);
+        if (recursion_depth > 0) {
+            // Recursive call
+            return intensity(scene, reflected_ray, pixel_color, recursion_depth - 1);
+        } else {
+            // Return black
+            return pixel_color;
+        }
     } else {
-        return RGB(0, 0, 0);
+        return pixel_color;
     }
 }
-
-
 
 void progress(int j, double height) {
     double percent = fabs((j-height) / height) * 100;
@@ -94,7 +98,7 @@ __map_iterator <__tree_iterator <__value_type <Object *, double>, __tree_node <_
     return it;
 }
 
-RGB intensity(Scene scene, Ray r, RGB pixel_color) {
+RGB intensity(Scene scene, Ray r, RGB pixel_color, int recursion_depth) {
     // Generate list of objects hit by ray
     auto hit_list = hitList(r, scene);
     auto it = get_closest(hit_list);
@@ -102,20 +106,20 @@ RGB intensity(Scene scene, Ray r, RGB pixel_color) {
     double t = it->second;
     // If object is in front of camera
     if (t > 0.0) {
-        //V3 p = r(t);
+        V3 p = r(t * 0.999);
         // Calculate normal to surface
-        V3 normal = object->normal(r(t));
+        V3 normal = object->normal(p);
         // Loop over all illumination sources
         for (auto source: scene._sources) {
             // Specular
-            auto light_vector = (source->_position - r(t));
-            auto reflection_ray = unit(reflect(r(t),normal));
+            auto light_vector = (source->_position - p);
+            auto reflection_ray = unit(reflect(p,normal));
             double specular_intensity = object->_reflectivity * specular(reflection_ray, light_vector) * SPECULAR_COEF;
             // Diffuse
             double diffuse_intensity = (1-object->_reflectivity) * diffuse(normal, light_vector) * DIFFUSE_COEF;
             double ambient_intensity = AMBIENT_COEF;
             // Reflected
-            RGB reflected_light = object->_reflectivity * reflected(reflection_ray, r(t), scene, pixel_color) * REFLECTION_COEF;
+            RGB reflected_light = object->_reflectivity * reflected(reflection_ray, p, scene, pixel_color, recursion_depth) * REFLECTION_COEF;
             // Add to pixel color
             pixel_color += (reflected_light + (((source->_intensity * (specular_intensity + diffuse_intensity)) + ambient_intensity) * object->_color));
         }
@@ -123,7 +127,7 @@ RGB intensity(Scene scene, Ray r, RGB pixel_color) {
     return pixel_color;
 }
 
-void render(Camera cam, Scene scene) {
+void render(Camera cam, Scene scene, int recursion_depth) {
     // Open ppm file
     ofstream output;
     output.open ("image.ppm");
@@ -145,7 +149,7 @@ void render(Camera cam, Scene scene) {
             // TODO: fix crash on empty scene
             // TODO: refactor min_element selection out
             // TODO: add backdrop function?
-            RGB pixel_color = intensity(scene, r, RGB(0, 0, 0));
+            RGB pixel_color = intensity(scene, r, RGB(0, 0, 0), recursion_depth);
             // Clamp and write colour
             write_RGB(output, pixel_color);
 
