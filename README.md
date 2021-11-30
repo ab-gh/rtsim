@@ -13,7 +13,7 @@ scn.addSource(new Source(Vector(7, -5, -1), .2));
 render(Camera cam, scn);
 ```
 
-![](https://raw.githubusercontent.com/ab-gh/rtsim/main/docs/Screenshot%202021-11-24%20at%206.57.55%20pm.png)
+![](https://raw.githubusercontent.com/ab-gh/rtsim/main/docs/demo.png)
 
 ## Features
 
@@ -35,10 +35,7 @@ render(Camera cam, scn);
   - [x] Ambient (constant)
   - [x] Diffuse
   - [x] Specular
-  - [ ] Reflection
-    - Currently only crude reflection with one depth
-    - Need to factor out the intensity function to call recursively
-    - For some reason, doesn't work with spheres
+  - [x] Reflection
   - [ ] Refraction
   - [ ] Global Illumination
 - [ ] Rendering
@@ -50,6 +47,6 @@ render(Camera cam, scn);
 
 - [x] Add a floor
 - [ ] Add a room
-- [ ] Add reflectivity 
-- [ ] Factor out the intensity function
+- [x] Add reflectivity 
+- [x] Factor out the intensity function
 - [ ] Read in scene fies
