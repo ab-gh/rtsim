@@ -26,7 +26,7 @@ public:
         this->_color = colour;
         this->_reflectivity = reflectivity;
     }
-    virtual ~Sphere() = default;
+    ~Sphere() = default;
     double intersect(const Ray &ray, double min, double max) const {
         V3 oc = ray.origin() - _position;
         auto a = dot(ray.direction(), ray.direction());
@@ -50,6 +50,28 @@ public:
         }
     }
 
+};
+// Infinite Plane
+
+class InfinitePlane : public Object {
+private:
+    V3 _normal;
+public:
+    InfinitePlane(V3 position, V3 normal, RGB colour) : Object() {
+        this->_position = position;
+        this->_normal = normal;
+        this->_color = colour;
+        this->_reflectivity = 0;
+    }
+    ~InfinitePlane() = default;
+    double intersect(const Ray &ray, double min, double max) const {
+        auto denom = dot(unit(ray.direction()), unit(_normal));
+        auto dist = dot(unit(_position - ray.origin()), unit(_normal)) / denom;
+        if (dist < min || max < dist) {
+            return -1.0;
+        }
+        return fabs(dist);
+    }
 };
 
 // Cylinder

@@ -19,7 +19,7 @@ render(Camera cam, scn);
 
 - [ ] Objects
   - [x] Spheres
-  - [ ] Planes
+  - [x] Planes
   - [ ] Triangles
   - [ ] Cuboids
   - [ ] Cylinders

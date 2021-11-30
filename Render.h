@@ -2,6 +2,8 @@
 #define RTSIM_RENDER_H
 
 #define AMBIENT_COEF 0.05
+#define DIFFUSE_COEF 1
+#define SPECULAR_COEF 1
 
 #define INFTY 1e10
 
@@ -101,9 +103,9 @@ void render(Camera cam, Scene scene) {
                     // Specular
                     auto light_vector = (source->_position - r(t));
                     auto reflection_ray = unit(reflect(r(t),normal));
-                    double specular_intensity = object->_reflectivity * specular(reflection_ray, light_vector);
+                    double specular_intensity = object->_reflectivity * specular(reflection_ray, light_vector) * SPECULAR_COEF;
                     // Diffuse
-                    double diffuse_intensity = (1-object->_reflectivity) * diffuse(normal, light_vector);
+                    double diffuse_intensity = (1-object->_reflectivity) * diffuse(normal, light_vector) * DIFFUSE_COEF;
                     double ambient_intensity = AMBIENT_COEF;
                     // Add to pixel color
                     pixel_color += ((source->_intensity * (specular_intensity + diffuse_intensity)) + ambient_intensity) * object->_color;
