@@ -79,10 +79,11 @@ void render(Camera cam, Scene scene) {
             RGB pixel_color(0, 0, 0);
             // Generate list of objects hit by ray
             auto hit_list = hitList(r, scene);
-            // Find closest object
+            // Find the closest object
             using Iter = std::map<Object*, double>::iterator;
             // TODO: fix crash on empty scene
             auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
+                // Send objects to infinity if they are not hit
                 auto l = lhs.second < 0 ? numeric_limits<double>::max() : lhs.second;
                 auto r = rhs.second < 0 ? numeric_limits<double>::max() : rhs.second;
                 return l < r;

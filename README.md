@@ -39,3 +39,4 @@ render(Camera cam, scn);
 - [ ] Rendering
   - [ ] Free camera
   - [ ] Anti-aliasing
+  - [ ] Specify file name
