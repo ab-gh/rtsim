@@ -50,8 +50,13 @@ auto hitList(Ray ray, Scene scene) {
     return hit_list;
 }
 
+void progress(int j, double height) {
+    double percent = fabs((j-height) / height) * 100;
+    int p = static_cast<int>(percent);
+    cout << "\rRendering scene... " << p << "% complete" << flush;
+}
+
 void render(Camera cam, Scene scene) {
-    std::cout << "Rendering scene..." << std::endl;
     // Open ppm file
     ofstream output;
     output.open ("image.ppm");
@@ -62,6 +67,7 @@ void render(Camera cam, Scene scene) {
 
     // Loop through each pixel
     for (int j = cam.image_height-1; j >=0; --j) {
+        progress(j, cam.image_height);
         for (int i = 0; i < cam.image_width; ++i) {
             // Rendering
             auto u = double(i) / double(cam.image_width-1);
