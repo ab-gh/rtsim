@@ -40,3 +40,10 @@ render(Camera cam, scn);
   - [ ] Free camera
   - [ ] Anti-aliasing
   - [ ] Specify file name
+
+# TODO
+
+- Add a floor
+- Add a room
+- Add reflectivity
+- Read in scene fies
