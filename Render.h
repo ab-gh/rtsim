@@ -1,9 +1,10 @@
 #ifndef RTSIM_RENDER_H
 #define RTSIM_RENDER_H
 
-#define AMBIENT_COEF 0.05
+#define AMBIENT_COEF 0.09
 #define DIFFUSE_COEF 1
 #define SPECULAR_COEF 1
+#define REFLECTION_COEF 0.8
 
 #define INFTY 1e10
 
@@ -16,6 +17,17 @@
 #include "Vector.h"
 #include "Scene.h"
 using namespace std;
+
+// Track what objects the ray line will hit
+auto hitList(Ray ray, Scene scene) {
+    // Create map for objects hit and their distance
+    map<Object*, double> hit_list;
+    for (auto object : scene._objects) {
+        // Find intersections between 0 and infinity
+        hit_list.insert(make_pair(object, object->intersect(ray, 0, INFTY)));
+    }
+    return hit_list;
+}
 
 // Specular scattering
 double specular(V3 reflection_ray, V3 source_ray) {
@@ -41,16 +53,27 @@ double diffuse(V3 normal_ray, V3 source_ray) {
     return light_intensity;
 }
 
-// Track what objects the ray line will hit
-auto hitList(Ray ray, Scene scene) {
-    // Create map for objects hit and their distance
-    map<Object*, double> hit_list;
-    for (auto object : scene._objects) {
-        // Find intersections between 0 and infinity
-        hit_list.insert(make_pair(object, object->intersect(ray, 0, INFTY)));
+// Reflected light
+RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene) {
+    Ray reflected_ray(reflection_point, reflection_ray);
+    auto hit_list = hitList(reflected_ray, scene);
+    auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
+        // Send objects to infinity if they are not hit
+        auto l = lhs.second <= 0 ? numeric_limits<double>::max() : lhs.second;
+        auto r = rhs.second <= 0 ? numeric_limits<double>::max() : rhs.second;
+        return l < r;
+    });
+    Object* object = it->first;
+    double t = it->second;
+    // If an object is not hit, return black
+    if (t > 0) {
+        return object->_color;
+    } else {
+        return RGB(0, 0, 0);
     }
-    return hit_list;
 }
+
+
 
 void progress(int j, double height) {
     double percent = fabs((j-height) / height) * 100;
@@ -82,8 +105,8 @@ void render(Camera cam, Scene scene) {
             // Generate list of objects hit by ray
             auto hit_list = hitList(r, scene);
             // Find the closest object
-            using Iter = std::map<Object*, double>::iterator;
             // TODO: fix crash on empty scene
+            // TODO: refactor min_element selection out
             auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
                 // Send objects to infinity if they are not hit
                 auto l = lhs.second < 0 ? numeric_limits<double>::max() : lhs.second;
@@ -96,8 +119,7 @@ void render(Camera cam, Scene scene) {
             if (t > 0.0) {
                 //V3 p = r(t);
                 // Calculate normal to surface
-                // TODO: abstract for non-spheres?
-                V3 normal = unit(r(t) - object->_position);
+                V3 normal = object->normal(r(t));
                 // Loop over all illumination sources
                 for (auto source: scene._sources) {
                     // Specular
@@ -107,8 +129,10 @@ void render(Camera cam, Scene scene) {
                     // Diffuse
                     double diffuse_intensity = (1-object->_reflectivity) * diffuse(normal, light_vector) * DIFFUSE_COEF;
                     double ambient_intensity = AMBIENT_COEF;
+                    // Reflected
+                    RGB reflected_light = object->_reflectivity * reflected(reflection_ray, r(t), scene) * REFLECTION_COEF;
                     // Add to pixel color
-                    pixel_color += ((source->_intensity * (specular_intensity + diffuse_intensity)) + ambient_intensity) * object->_color;
+                    pixel_color += (reflected_light + (((source->_intensity * (specular_intensity + diffuse_intensity)) + ambient_intensity) * object->_color));
                 }
             }
             // Clamp and write colour

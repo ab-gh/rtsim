@@ -23,7 +23,7 @@ render(Camera cam, scn);
   - [ ] Triangles
   - [ ] Cuboids
   - [ ] Cylinders
-  - [ ] Cone
+  - [x] Cone
 - [ ] Materials
   - [x] Reflectivity parameters
   - [ ] Emissive
@@ -36,6 +36,9 @@ render(Camera cam, scn);
   - [x] Diffuse
   - [x] Specular
   - [ ] Reflection
+    - Currently only crude reflection with one depth
+    - Need to factor out the intensity function to call recursively
+    - For some reason, doesn't work with spheres
   - [ ] Refraction
   - [ ] Global Illumination
 - [ ] Rendering
@@ -45,7 +48,8 @@ render(Camera cam, scn);
 
 # TODO
 
-- Add a floor
-- Add a room
-- Add reflectivity
-- Read in scene fies
+- [x] Add a floor
+- [ ] Add a room
+- [ ] Add reflectivity 
+- [ ] Factor out the intensity function
+- [ ] Read in scene fies

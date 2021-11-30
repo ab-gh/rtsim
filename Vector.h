@@ -44,11 +44,6 @@ public:
         return sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
     }
 
-    // Near Zero
-    [[nodiscard]] bool near_zero() const {
-        const auto beta = 1e-8;
-        return (fabs(vector[0]) < beta) && (fabs(vector[1]) < beta) && (fabs(vector[2]) < beta);
-    }
 
 };
 
