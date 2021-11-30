@@ -4,7 +4,7 @@
 #define AMBIENT_COEF 0.09
 #define DIFFUSE_COEF 1
 #define SPECULAR_COEF 1
-#define REFLECTION_COEF 0.8
+#define REFLECTION_COEF 0.5
 
 #define INFTY 1e10
 
@@ -88,7 +88,7 @@ void progress(int j, double height) {
     cout << "\rRendering scene... " << p << "% complete" << flush;
 }
 
-__map_iterator <__tree_iterator <__value_type <Object *, double>, __tree_node <__value_type <Object *, double>, void *> *, long>> get_closest(map<Object*, double> hit_list) {
+map<Object*, double>::iterator get_closest(map<Object*, double> hit_list) {
     auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
         // Send objects to infinity if they are not hit
         auto l = lhs.second < 0 ? numeric_limits <double>::max ( ) : lhs.second;
@@ -106,6 +106,7 @@ RGB intensity(Scene scene, Ray r, RGB pixel_color, int recursion_depth) {
     double t = it->second;
     // If object is in front of camera
     if (t > 0.0) {
+        // Pull t back a little bit to prevent reflections jumping over boundaries due to floating-point errors
         V3 p = r(t * 0.999);
         // Calculate normal to surface
         V3 normal = object->normal(p);
