@@ -9,8 +9,8 @@ class Object {
 public:
     Object() = default;
     virtual ~Object() = default;
-    virtual double intersect(const Ray &ray, double min, double max) const = 0;
-    virtual V3 normal(const V3 &point) = 0;
+    virtual std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const = 0;
+    virtual V3 normal(const V3 &point) const = 0;
 public:
     V3 _position;
     RGB _color;
@@ -28,10 +28,10 @@ public:
         this->_reflectivity = reflectivity;
     }
     ~Sphere() = default;
-    V3 normal(const V3 &point) override {
+    V3 normal(const V3 &point) const override {
         return unit(point - this->_position);
     }
-    double intersect(const Ray &ray, double min, double max) const {
+    std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const override {
         V3 oc = ray.origin() - _position;
         auto a = dot(ray.direction(), ray.direction());
         auto b_div_2 = dot(oc, ray.direction());
@@ -39,7 +39,7 @@ public:
         auto discriminant = b_div_2 * b_div_2 - a * c;
         if (discriminant < 0) {
             // No Hit
-            return -1.0;
+            return std::make_pair( -1.0, this);
         } else {
             auto sqrt_discriminant = sqrt(discriminant);
             auto root = (-b_div_2 - sqrt_discriminant) / a;
@@ -47,19 +47,23 @@ public:
                 root = (-b_div_2 + sqrt_discriminant) / a;
                 if (root < min || max < root) {
                     // No Hit
-                    return -1.0;
+                    return std::make_pair( -1.0, this);
                 }
             }
-            return root;
+            return std::make_pair( root, this);
         }
     }
 
 };
+
+
+
 // Infinite Plane
 class InfinitePlane : public Object {
-private:
+protected:
     V3 _normal;
 public:
+    InfinitePlane() {};
     InfinitePlane(V3 position, V3 normal, RGB colour, double reflectivity) : Object() {
         this->_position = position;
         this->_normal = normal;
@@ -67,16 +71,53 @@ public:
         this->_reflectivity = reflectivity;
     }
     ~InfinitePlane() = default;
-    V3 normal(const V3 &point) override {
+    V3 normal(const V3 &point) const override {
         return _normal;
     }
-    double intersect(const Ray &ray, double min, double max) const {
+    std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const override {
         auto denom = dot(unit(ray.direction()), unit(_normal));
         auto dist = dot(_position - ray.origin(), unit(_normal)) / denom;
         if (dist < min || max < dist) {
-            return -1.0;
+            return std::make_pair( -1.0, this);
         }
-        return fabs(dist);
+        return std::make_pair( fabs(dist), this);
+    }
+};
+
+class Disc : public InfinitePlane {
+private:
+    double _radius;
+public:
+    Disc() {};
+    Disc(V3 position, V3 normal, double radius, RGB colour, double reflectivity) : InfinitePlane(position, normal, colour, reflectivity) {
+        this->_position = position;
+        this->_normal = normal;
+        this->_radius = radius;
+        this->_color = colour;
+        this->_reflectivity = reflectivity;
+    }
+    ~Disc() = default;
+    V3 normal(const V3 &point) const override {
+        return _normal;
+    }
+    std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const override {
+        // Plane intersection
+        auto denom = dot(unit(ray.direction()), unit(_normal));
+        auto dist = dot(_position - ray.origin(), unit(_normal)) / denom;
+        if (dist < min || max < dist) {
+            return std::make_pair( -1.0, this);
+        } else {
+            V3 p = ray.origin() + ray.direction()*fabs(dist);
+            V3 v = p - _position;
+            auto d2 = dot(v, v);
+            if (sqrtf(d2) <= _radius) {
+                // Iniside the radius
+                return std::make_pair( fabs(dist), this);
+            } else {
+                // Outside the radius
+                return std::make_pair( -1.0, this);
+            }
+        }
     }
 };
 // Cone
@@ -84,6 +125,7 @@ class Cone : public Object {
 private:
     V3 _base;
     double _radius;
+    Disc _cap;
 public:
     Cone(V3 position, V3 base, double radius, RGB colour, double reflectivity) : Object() {
         this->_position = position;
@@ -91,9 +133,11 @@ public:
         this->_radius = radius;
         this->_color = colour;
         this->_reflectivity = reflectivity;
+        V3 cap_normal =unit(base - position);
+        this->_cap = Disc(base, cap_normal, radius, colour, reflectivity);
     }
     ~Cone() = default;
-    V3 normal(const V3 &point) override {
+    V3 normal(const V3 &point) const override {
         auto Vx = point.x() - _position.x();
         auto Vz = point.z() - _position.z();
         auto V = unit(V3(Vx, 0, Vz));
@@ -104,7 +148,7 @@ public:
         return V3(Nx, Ny, Nz);
 
     }
-    double intersect(const Ray &ray, double min, double max) const {
+    std::pair<double, const Object*>  intersect(const Ray &ray, double min, double max) const override {
         double root;
         V3 H = _base - _position;
         V3 h = unit(H);
@@ -122,7 +166,7 @@ public:
         auto dotvh = fabs(dot(unit(v),h));
         if (discriminant < 0) {
             // No Hit
-            return -1.0;
+            return std::make_pair( -1.0, this);
         } else if (discriminant == 0) {
             if (dotvh != cosalpha) {
                 root = -(b / (2 * a));
@@ -142,11 +186,11 @@ public:
         auto Lint = ray.origin() + root * ray.direction();
         auto intersect_test = dot((Lint - _position), h);
         if (intersect_test < 0) {
-            return -1.0;
+            return std::make_pair( -1.0, this);
         } else if (intersect_test > H.length()) {
-            return -1.0;
+            return _cap.intersect(ray, min, max);
         } else {
-            return root;
+            return std::make_pair( root, this);
         }
     }
 };

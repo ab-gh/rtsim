@@ -24,10 +24,11 @@ RGB intensity(Scene, Ray, RGB, int);
 // Track what objects the ray line will hit
 auto hitList(Ray ray, Scene scene) {
     // Create map for objects hit and their distance
-    map<Object*, double> hit_list;
+    map<const Object*, double> hit_list;
     for (auto object : scene._objects) {
         // Find intersections between 0 and infinity
-        hit_list.insert(make_pair(object, object->intersect(ray, 0, INFTY)));
+        auto intersection = object->intersect(ray, 0, INFTY);
+        hit_list.insert(make_pair(intersection.second, intersection.first));
     }
     return hit_list;
 }
@@ -60,13 +61,13 @@ double diffuse(V3 normal_ray, V3 source_ray) {
 RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_color, int recursion_depth) {
     Ray reflected_ray(reflection_point, reflection_ray);
     auto hit_list = hitList(reflected_ray, scene);
-    auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
+    auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<const Object*, double> &lhs, const pair<const Object*, double> &rhs) {
         // Send objects to infinity if they are not hit
         auto l = lhs.second <= 0 ? numeric_limits<double>::max() : lhs.second;
         auto r = rhs.second <= 0 ? numeric_limits<double>::max() : rhs.second;
         return l < r;
     });
-    Object* object = it->first;
+    const Object* object = it->first;
     double t = it->second;
     // If an object is not hit, return black
     if (t > 0) {
@@ -88,8 +89,8 @@ void progress(int j, double height) {
     cout << "\rRendering scene... " << p << "% complete" << flush;
 }
 
-map<Object*, double>::iterator get_closest(map<Object*, double> hit_list) {
-    auto it = min_element(hit_list.begin(), hit_list.end(), [](const pair<Object*, double> &lhs, const pair<Object*, double> &rhs) {
+auto get_closest(map<const Object*, double> hit_list) {
+    auto it = min_element(hit_list.begin(), hit_list.end(), [](pair<const Object *const, double> lhs, pair<const Object *const, double> rhs) {
         // Send objects to infinity if they are not hit
         auto l = lhs.second < 0 ? numeric_limits <double>::max ( ) : lhs.second;
         auto r = rhs.second < 0 ? numeric_limits <double>::max ( ) : rhs.second;
@@ -102,8 +103,8 @@ RGB intensity(Scene scene, Ray r, RGB pixel_color, int recursion_depth) {
     // Generate list of objects hit by ray
     auto hit_list = hitList(r, scene);
     auto it = get_closest(hit_list);
-    Object* object = it->first;
-    double t = it->second;
+    auto object = it->first;
+    auto t = it->second;
     // If object is in front of camera
     if (t > 0.0) {
         // Pull t back a little bit to prevent reflections jumping over boundaries due to floating-point errors
