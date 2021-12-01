@@ -31,7 +31,7 @@ public:
     V3 normal(const V3 &point) override {
         return unit(point - this->_position);
     }
-    double intersect(const Ray &ray, double min, double max) const {
+    double intersect(const Ray &ray, double min, double max) const override {
         V3 oc = ray.origin() - _position;
         auto a = dot(ray.direction(), ray.direction());
         auto b_div_2 = dot(oc, ray.direction());
@@ -70,7 +70,7 @@ public:
     V3 normal(const V3 &point) override {
         return _normal;
     }
-    double intersect(const Ray &ray, double min, double max) const {
+    double intersect(const Ray &ray, double min, double max) const override {
         auto denom = dot(unit(ray.direction()), unit(_normal));
         auto dist = dot(_position - ray.origin(), unit(_normal)) / denom;
         if (dist < min || max < dist) {
@@ -104,7 +104,7 @@ public:
         return V3(Nx, Ny, Nz);
 
     }
-    double intersect(const Ray &ray, double min, double max) const {
+    double intersect(const Ray &ray, double min, double max) const override {
         double root;
         V3 H = _base - _position;
         V3 h = unit(H);
