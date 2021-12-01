@@ -74,6 +74,7 @@ public:
     V3 normal(const V3 &point) const override {
         return _normal;
     }
+
     std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const override {
         auto denom = dot(unit(ray.direction()), unit(_normal));
         auto dist = dot(_position - ray.origin(), unit(_normal)) / denom;
