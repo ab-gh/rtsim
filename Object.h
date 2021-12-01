@@ -56,8 +56,6 @@ public:
 
 };
 
-
-
 // Infinite Plane
 class InfinitePlane : public Object {
 protected:
@@ -111,9 +109,9 @@ public:
             V3 p = ray.origin() + ray.direction()*fabs(dist);
             V3 v = p - _position;
             auto d2 = dot(v, v);
-            if (sqrtf(d2) <= _radius) {
+            if (d2 <= pow(_radius, 2)) {
                 // Iniside the radius
-                return std::make_pair( fabs(dist), this);
+                return std::make_pair( (dist), this);
             } else {
                 // Outside the radius
                 return std::make_pair( -1.0, this);
@@ -134,7 +132,7 @@ public:
         this->_radius = radius;
         this->_color = colour;
         this->_reflectivity = reflectivity;
-        V3 cap_normal =unit(base - position);
+        V3 cap_normal = unit(base - position);
         this->_cap = Disc(base, cap_normal, radius, colour, reflectivity);
     }
     ~Cone() = default;
@@ -151,20 +149,21 @@ public:
     }
     std::pair<double, const Object*>  intersect(const Ray &ray, double min, double max) const override {
         double root;
+        double otherroot;
         V3 H = _base - _position;
-        V3 h = unit(H);
+        V3 hhat = unit(H);
         V3 v = ray.direction();
         V3 w = ray.origin() - _position;
-        auto m = pow(_radius, 2) / pow(H.length(), 2);
+        auto m = powf(_radius, 2) / powf(H.length(), 2);
 
-        auto a = dot(v,v) - m * pow(dot(v,h), 2) - pow(dot(v,h), 2);
-        auto b = 2 * ( dot(v,w) - m*dot(v,h)*dot(w,h) - dot(v,h)*dot(w,h) );
-        auto c = dot(w,w) - m*pow(dot(w,h), 2) - pow(dot(w,h), 2);
+        auto a = dot(v,v) - (m * pow(dot(v, hhat), 2)) - pow(dot(v, hhat), 2);
+        auto b = 2 * (dot(v,w) - (m * dot(v, hhat) * dot(w, hhat) )- (dot(v, hhat) * dot(w, hhat) ));
+        auto c = dot(w,w) - (m*pow(dot(w, hhat), 2)) - pow(dot(w, hhat), 2);
 
         auto discriminant = b*b - 4*a*c;
 
-        auto cosalpha = H.length()/sqrt(H.length()*H.length() - _radius*_radius);
-        auto dotvh = fabs(dot(unit(v),h));
+        auto cosalpha = H.length()/sqrt(H.length()*H.length() + _radius*_radius);
+        auto dotvh = fabs(dot(unit(v), hhat));
         if (discriminant < 0) {
             // No Hit
             return std::make_pair( -1.0, this);
@@ -173,29 +172,29 @@ public:
                 root = -(b / (2 * a));
             } else {
                 // Infinite hits, so assume none
-                root = (b / (2 * a));
+                return std::make_pair( root, this);
             }
         } else if (discriminant > 0) {
             auto root1 = (-b + sqrt(discriminant)) / (2 * a);
             auto root2 = (-b - sqrt(discriminant)) / (2 * a);
             if (root1 < root2) {
                 root = root1;
+                otherroot = root2;
             } else {
                 root = root2;
+                otherroot = root1;
             }
         }
-        auto Lint = ray.origin() + root * ray.direction();
-        auto intersect_test = dot((Lint - _position), h);
-        if (intersect_test < 0) {
-            return std::make_pair( -1.0, this);
-        } else if (intersect_test > H.length()) {
+        auto Lint = ray.origin() + (root * unit(ray.direction()));
+        auto intersect_test = dot((Lint - _position), hhat);
+        if (intersect_test > H.length()) {
             return _cap.intersect(ray, min, max);
-        } else {
+        } else if (0 <= intersect_test && intersect_test <= H.length()) {
             return std::make_pair( root, this);
+        } else if (intersect_test < 0) {
+            return std::make_pair (-1.0, this);
         }
     }
 };
-// Cylinder
-
 
 #endif //RTSIM_OBJECT_H

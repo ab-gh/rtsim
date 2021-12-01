@@ -12,6 +12,7 @@ using namespace std;
 int main() {
     Camera cam;
     Scene scn;
+    /* SNOWMAN */
     // Body
     scn.addObject(new Sphere(Vector(0, -2, -4), 0.9, RGB(1, 1, 1), 0));
     scn.addObject(new Sphere(Vector(0, -0.55, -4), 0.7, RGB(1, 1, 1), 0));
@@ -28,9 +29,10 @@ int main() {
     scn.addObject(new Sphere(Vector(-0.12, 0.39, -3.55), 0.04, RGB(0.1, 0.1, 0.1), 0.1));
     scn.addObject(new Sphere(Vector(0.12, 0.39, -3.55), 0.04, RGB(0.1, 0.1, 0.1), 0.1));
 
+
+    /* SCENE */
     // Floor
     scn.addObject(new InfinitePlane(Vector(0, -3, 0), Vector(0, 1, 0), RGB(1, 1, 1), 0.4));
-
     // Top
     scn.addSource(new Source(Vector(0, 5, -1), 0.8));
     // Side key

@@ -1,7 +1,3 @@
-//
-// Created by ash on 23/11/2021.
-//
-
 #ifndef RTSIM_SOURCE_H
 #define RTSIM_SOURCE_H
 

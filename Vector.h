@@ -3,8 +3,6 @@
 #ifndef RTSIM_VECTOR_H
 #define RTSIM_VECTOR_H
 
-
-
 class Vector {
 private:
     double vector[3];

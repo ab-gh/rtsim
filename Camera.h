@@ -1,7 +1,3 @@
-//
-// Created by ash on 23/11/2021.
-//
-
 #ifndef RTSIM_CAMERA_H
 #define RTSIM_CAMERA_H
 
