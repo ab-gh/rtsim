@@ -1,0 +1,127 @@
+\documentclass[a4paper]{article}
+
+\title{Ray Tracing}
+\author{ab-gh}
+\date{1 December 2021}
+
+% LaTeX preambule: loading relevant packages, configuring Python listings
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{bm}
+\usepackage{amsfonts}
+\usepackage{circuitikz}
+\newcommand{\secref}[1]{\autoref{#1}. \nameref{#1}}
+
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+% Settings for colour-coding and formatting Python code:
+\lstset{
+  language=Python,                % the language of the code
+  basicstyle=\ttfamily\footnotesize,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=5,                   % the step between two line-numbers. If it's 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},          % keyword style
+  commentstyle=\color{dkgreen},       % comment style
+  stringstyle=\color{mauve},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  morekeywords={*,...}               % if you want to add more keywords to the set
+}
+
+\begin{document}
+\maketitle
+
+{\bf Task:} To create an advanced optical simulation program in C++. Using the principles of {\it Ray Tracing}, {\it Object-Oriented Design}, and the material covered in PH3170, this project aims to produce a realistic image of a simulated scene, including accurate objects and lighting.
+
+\section{Introduction and Theory}
+To start the project, I set out a series of objectives for the final code, and a set of milestones to progress through. In order to fulfill the requirements of the task, my code needs to be able to:
+\begin{itemize}
+  \item{Allow a user to specify the geometry, location, and material properties of primative shapes in the scene.}
+  \item{Allow a user to specify the location and intensity of sources of light.}
+  \item{Simulate the object's interactions with the light sources and other objects in the scene using {\it reverse ray tracing}.}
+  \item{Produce an image of the simulated scene, as if a camera was taking a photograph.}
+\end{itemize}
+To achieve these aims, I set out to complete the following milestones, roughly in order. By breaking the project down into smaller components, I not only ensure that I don't waste time working on one feature when an underlying feature is broken, but also lend my code-writing process to Object Oriented Design (OOD) principles.
+\begin{enumerate}
+  \item{Construct a fully-functional but abstract Vector data type, capable of defining vectors and points in 3D cartesian space, and computing all relevant vector operations}
+  \item{Construct a ``virtual camera'', which sends rays out into the ``world'', and calculates the ray's interactions with objects and lights}
+  \item{Output the intensity and colour of each ray as a pixel in an image}
+  \item{Define primative objects, classes which contain the object's geometry and properties, as well as functions to calculate the intersections between its self and a camera ray, and a function to calculate the surface normal of the shape at any point.}
+  \item{Define light sources, with an intensity and position}
+  \item{Construct a ``rendering engine'', capable of simulating various types of illumination, and linking the virtual camera to the ``world'' (scene) of objects in front of it.}
+\end{enumerate}
+\subsection{Ray Tracing Theory}
+To produce a realistic depiction of the scene, this project uses a technique called {\it reverse ray tracing}. In a real physical scene, the illumination of objects can be approximated as light sources emitting rays which interact with the object, reflecting light to a new ray direction. If one of these light rays, after however many reflections, hits a sensor (be it an eye or camera), it is ``seen'' by the observer. In a computational simulation, a tiny fraction of the rays emitted from a source will actually make it to the observer, so this process is very inefficient.
+
+To combat this, {\it reverse} ray tracing is used, with the same principles, except the observer emits a ``sight'' ray, which reflects according to the same laws, until it hits a light source. To produce the image, the observer ``looks'' through a viewport - a rectangular boundary in space - similarly to a camera sensor. Sight rays are constructed with a vector from an ``eye'' (focus of the observation plane) to each pixel on the viewport, which is then projected into the scene, and the reverse ray tracing begins.
+
+\begin{figure}[!h]
+  \centering
+  \begin{circuitikz}
+    \draw [line width=0.5mm] (0,0) node {} -- (0,3) node[pos=1,above] {viewport};
+    \draw (5,0) circle (1cm);
+    \draw[fill=black] (-2,1.5) circle (0.1cm);
+    \draw[fill=yellow] (3,2.9) circle (0.1cm);
+    \draw (-2,1.5) node[above left=of eye] {eye} to node[currarrow] {} (4.2,0.6);
+    \draw[->] (4.2,0.6) -- (3.5,1.125) node[above left=of $\hat n$] {$\hat n$};
+    \draw (4.2,0.6) node to node[curarrow] {} (3,2.9) node[above right=of light source] {light source};
+  \end{circuitikz}
+  \caption{Demonstration of reverse ray tracing, reflecting a sight ray from the eye through the viewport off a sphere.}
+\end{figure}
+
+\subsection{Object Oriented Design}
+This project required a lot of different components to work together accurately, yet still abstract enough to be flexible, allowing the development of more shapes, interactions, and materials in future. Because of this, applying the principles of Object Oriented Design was essential. Each component of the project was ``compartmentalized'' in its own header file, using inheritance where possible. Each class interacts with the renderer, which produces the final image.
+
+\section{Implementation}
+This section explains the implementation of the ray tracing simulator, following the process outline in the milestones above.
+
+\subsection{Vector base class}
+The first task of the implementation was to construct a fully-featured vector class. Defined in \verb|Vector.h|, the \verb|Vector| class serves as the basis for almost every other element of the simulator. As such, it defines an extensive list of methods and operations for vectors.
+
+\begin{lstlisting}[language=C++, belowskip=-0.8 \baselineskip]
+class Vector {
+  private:
+      double vector[3];
+  public:
+      Vector() : vector{0, 0, 0} {};
+      Vector(double x, double y, double z) : vector{x, y, z} {};
+      ...
+  };
+\end{lstlisting}Operations for vectors are also defined outside of the \verb|Vector| class, as inline functions, so that they can be accessed outside of a Vector:
+\begin{lstlisting}[language=C++, belowskip=-0.8 \baselineskip]
+inline Vector operator+(const Vector &u, const Vector &v) {
+    return {u.x() + v.x(), u.y() + v.y(), u.z() + v.z()};
+}
+...
+\end{lstlisting}In addition to the basic mathematical operations, the header file defines the dot and cross product (\verb|dot(u,v)|, \verb|cross(u,v)|), unit vector (\verb|unit(u)|), as well as reflections (\verb|reflect(i,n)|) and refractions (\verb|refract(i,n,eta)|). The \verb|Vector| class also has three aliases, which help to make their specific use clearer in context: \verb|V3|, \verb|P3|, \verb|RGB|.
+
+\subsection{Camera, viewport, and scene}
+Now that the basic vector class is implemented, the virtual world of the simulation can be built. The file \verb|Camera.h| defines the \verb|Camera| class, which includes the eye and viewport. For simplicity, this has default values of a 16:9 aspect ratio image, with 1000 pixels across, which translates to a height of $2$ in the simulated world. The focal length is defined as $1$, which means the ``eye'' is one unit behind the centre of the viewport. The viewport is centered on the origin, looking down the negative $z$ axis. This geometry allows you to consider the image as if it were an $x,y$ plane, with depth as $-z$. 
+
+Next, the \verb|Scene.h| file defines the simulated world as the class \verb|Scene|. This is a very simple class, with two \verb|std::vector| attributes: one to hold the list of objects in the scene, and one to hold the list of light sources. Two methods are also defined, which add objects and light sources to the scene once created.
+\begin{appendix}
+\end{appendix}
+
+
+\end{document}
