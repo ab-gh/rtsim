@@ -34,5 +34,6 @@ int main() {
     // Render the scene with a maximum reflection depth of 2
     render(cam, scn, 2);
     scn.save("scene.yml");
+    scn.read("scene.yml");
     return 0;
 }
