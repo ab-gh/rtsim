@@ -143,14 +143,12 @@ void render(Camera cam, Scene scene, int recursion_depth) {
         progress(j, cam.image_height);
         for (int i = 0; i < cam.image_width; ++i) {
             // Rendering
+            // TODO: refactor
             auto u = double(i) / double(cam.image_width-1);
             auto v = double(j) / double(cam.image_height-1);
             // Construct ray
             Ray r(cam.origin, cam.lower_left_corner + u * cam.horizontal + v * cam.vertical - cam.origin);
             // Find the closest object
-            // TODO: fix crash on empty scene
-            // TODO: refactor min_element selection out
-            // TODO: add backdrop function?
             RGB pixel_color = intensity(scene, r, RGB(0, 0, 0), recursion_depth);
             // Clamp and write colour
             write_RGB(output, pixel_color);

@@ -98,6 +98,7 @@ This section explains the implementation of the ray tracing simulator, following
 
 \subsection{Vector base class}
 The first task of the implementation was to construct a fully-featured vector class. Defined in \verb|Vector.h|, the \verb|Vector| class serves as the basis for almost every other element of the simulator. As such, it defines an extensive list of methods and operations for vectors.
+% dont need all of these vector sections %
 
 \begin{lstlisting}[language=C++, belowskip=-0.8 \baselineskip]
 class Vector {
@@ -120,6 +121,9 @@ inline Vector operator+(const Vector &u, const Vector &v) {
 Now that the basic vector class is implemented, the virtual world of the simulation can be built. The file \verb|Camera.h| defines the \verb|Camera| class, which includes the eye and viewport. For simplicity, this has default values of a 16:9 aspect ratio image, with 1000 pixels across, which translates to a height of $2$ in the simulated world. The focal length is defined as $1$, which means the ``eye'' is one unit behind the centre of the viewport. The viewport is centered on the origin, looking down the negative $z$ axis. This geometry allows you to consider the image as if it were an $x,y$ plane, with depth as $-z$. 
 
 Next, the \verb|Scene.h| file defines the simulated world as the class \verb|Scene|. This is a very simple class, with two \verb|std::vector| attributes: one to hold the list of objects in the scene, and one to hold the list of light sources. Two methods are also defined, which add objects and light sources to the scene once created.
+
+% focus on viewport and render %
+
 \begin{appendix}
 \end{appendix}
 

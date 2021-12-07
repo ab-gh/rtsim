@@ -1,5 +1,6 @@
 #include <string>
 #include <cmath>
+#include <string>
 #ifndef RTSIM_VECTOR_H
 #define RTSIM_VECTOR_H
 
@@ -96,6 +97,10 @@ inline Vector refract(const Vector &i, const Vector &n, double eta) {
     Vector out_perp = eta * (i + cos_theta * n);
     Vector out_para = -sqrt(fabs(1.0 - out_perp.length() * out_perp.length())) * n;
     return out_perp + out_para;
+}
+
+inline std::string str(const Vector &v) {
+    return "\"(" + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", " + std::to_string(v.z()) + ")\"";
 }
 
 #endif //RTSIM_VECTOR_H

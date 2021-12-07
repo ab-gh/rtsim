@@ -11,6 +11,7 @@ public:
     virtual ~Object() = default;
     virtual std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const = 0;
     virtual V3 normal(const V3 &point) const = 0;
+    virtual void serialize(std::ostream &os) const = 0;
 public:
     V3 _position;
     RGB _color;
@@ -28,6 +29,14 @@ public:
         this->_reflectivity = reflectivity;
     }
     ~Sphere() = default;
+    void serialize(std::ostream &os) const override {
+        os << "- Sphere: {" << std::endl;
+        os << "position: " << str(this->_position) << "," <<  std::endl;
+        os << "radius: " << this->_radius << ","  << std::endl;
+        os << "color: " << str(this->_color) << ","  << std::endl;
+        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "}" << std::endl;
+    }
     V3 normal(const V3 &point) const override {
         return unit(point - this->_position);
     }
@@ -69,6 +78,14 @@ public:
         this->_reflectivity = reflectivity;
     }
     ~InfinitePlane() = default;
+    void serialize(std::ostream &os) const override {
+        os << "- InfinitePlane: {" << std::endl;
+        os << "position: " << str(this->_position) << ","  << std::endl;
+        os << "normal: " << str(this->_normal) << ","  << std::endl;
+        os << "color: " << str(this->_color) << ","  << std::endl;
+        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "}" << std::endl;
+    }
     V3 normal(const V3 &point) const override {
         return _normal;
     }
@@ -96,6 +113,15 @@ public:
         this->_reflectivity = reflectivity;
     }
     ~Disc() = default;
+    void serialize(std::ostream &os) const override {
+        os << "- Disc: {" << std::endl;
+        os << "position: " << str(this->_position) << ","  << std::endl;
+        os << "normal: " << str(this->_normal) << ","  << std::endl;
+        os << "radius: " << this->_radius << ","  << std::endl;
+        os << "color: " << str(this->_color) << ","  << std::endl;
+        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "}" << std::endl;
+    }
     V3 normal(const V3 &point) const override {
         return _normal;
     }
@@ -136,6 +162,15 @@ public:
         this->_cap = Disc(base, cap_normal, radius, colour, reflectivity);
     }
     ~Cone() = default;
+    void serialize(std::ostream &os) const override {
+        os << "- Cone: {" << std::endl;
+        os << "position: " << str(this->_position) << ","  << std::endl;
+        os << "base: " << str(this->_base) << ","  << std::endl;
+        os << "radius: " << this->_radius << ","  << std::endl;
+        os << "color: " << str(this->_color) << ","  << std::endl;
+        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "}" << std::endl;
+    }
     V3 normal(const V3 &point) const override {
         auto Vx = point.x() - _position.x();
         auto Vz = point.z() - _position.z();
@@ -191,7 +226,7 @@ public:
             return _cap.intersect(ray, min, max);
         } else if (0 <= intersect_test && intersect_test <= H.length()) {
             return std::make_pair( root, this);
-        } else if (intersect_test < 0) {
+        } else {
             return std::make_pair (-1.0, this);
         }
     }
