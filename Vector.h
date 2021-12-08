@@ -1,8 +1,28 @@
 #include <string>
 #include <cmath>
-#include <string>
+#include <vector>
 #ifndef RTSIM_VECTOR_H
 #define RTSIM_VECTOR_H
+
+std::vector<std::string> explode(const std::string& str, const char& ch) {
+    std::string next;
+    std::vector<std::string> result;
+
+    for (std::string::const_iterator it = str.begin(); it != str.end(); it++) {
+        // Terminal char
+        if (*it == ch) {
+            if (!next.empty()) {
+                result.push_back(next);
+                next.clear();
+            }
+        } else {
+            next += *it;
+        }
+    }
+    if (!next.empty())
+        result.push_back(next);
+    return result;
+}
 
 class Vector {
 private:
@@ -10,6 +30,15 @@ private:
 public:
     Vector() : vector{0, 0, 0} {};
     Vector(double x, double y, double z) : vector{x, y, z} {};
+    Vector(std::string str) {
+        auto params = explode(str, ',');
+        auto x = params[0].erase(0,1);
+        auto y = params[1];
+        auto z = params[2].erase((params[2]).length()-1, 1);
+        vector[0] = stod(x);
+        vector[1] = stod(y);
+        vector[2] = stod(z);
+    }
     // Getters
     [[nodiscard]] double x() const {return vector[0];}
     [[nodiscard]] double y() const {return vector[1];}
@@ -100,7 +129,7 @@ inline Vector refract(const Vector &i, const Vector &n, double eta) {
 }
 
 inline std::string str(const Vector &v) {
-    return "\"(" + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", " + std::to_string(v.z()) + ")\"";
+    return "(" + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", " + std::to_string(v.z()) + ")";
 }
 
 #endif //RTSIM_VECTOR_H

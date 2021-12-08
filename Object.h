@@ -1,5 +1,6 @@
 #include "Vector.h"
 #include "Ray.h"
+#include <vector>
 
 #ifndef RTSIM_OBJECT_H
 #define RTSIM_OBJECT_H
@@ -8,6 +9,7 @@
 class Object {
 public:
     Object() = default;
+    Object(std::string);
     virtual ~Object() = default;
     virtual std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const = 0;
     virtual V3 normal(const V3 &point) const = 0;
@@ -28,13 +30,20 @@ public:
         this->_color = colour;
         this->_reflectivity = reflectivity;
     }
+    Sphere(std::string construction) {
+        auto params = explode(construction, ';');
+        this->_position = V3(params[0]);
+        this->_radius = stod(params[1]);
+        this->_color = RGB(params[2]);
+        this->_reflectivity = stod(params[3]);
+    }
     ~Sphere() = default;
     void serialize(std::ostream &os) const override {
-        os << "- Sphere: {" << std::endl;
-        os << "position: " << str(this->_position) << "," <<  std::endl;
-        os << "radius: " << this->_radius << ","  << std::endl;
-        os << "color: " << str(this->_color) << ","  << std::endl;
-        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "- Sphere: {";
+        os << str(this->_position) << ";";
+        os << this->_radius << ";";
+        os << str(this->_color) << ";";
+        os << this->_reflectivity << ";";
         os << "}" << std::endl;
     }
     V3 normal(const V3 &point) const override {
@@ -77,13 +86,20 @@ public:
         this->_color = colour;
         this->_reflectivity = reflectivity;
     }
+    InfinitePlane(std::string construction) {
+        auto params = explode(construction, ';');
+        this->_position = V3(params[0]);
+        this->_normal = V3(params[1]);
+        this->_color = RGB(params[2]);
+        this->_reflectivity = stod(params[3]);
+    }
     ~InfinitePlane() = default;
     void serialize(std::ostream &os) const override {
-        os << "- InfinitePlane: {" << std::endl;
-        os << "position: " << str(this->_position) << ","  << std::endl;
-        os << "normal: " << str(this->_normal) << ","  << std::endl;
-        os << "color: " << str(this->_color) << ","  << std::endl;
-        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "- InfinitePlane: {";
+        os << str(this->_position) << ";";
+        os << str(this->_normal) << ";";
+        os << str(this->_color) << ";";
+        os << this->_reflectivity << ";";
         os << "}" << std::endl;
     }
     V3 normal(const V3 &point) const override {
@@ -112,14 +128,22 @@ public:
         this->_color = colour;
         this->_reflectivity = reflectivity;
     }
+    Disc(std::string construction) {
+        auto params = explode(construction, ';');
+        this->_position = V3(params[0]);
+        this->_normal = V3(params[1]);
+        this->_radius = stod(params[2]);
+        this->_color = RGB(params[3]);
+        this->_reflectivity = stod(params[4]);
+    }
     ~Disc() = default;
     void serialize(std::ostream &os) const override {
-        os << "- Disc: {" << std::endl;
-        os << "position: " << str(this->_position) << ","  << std::endl;
-        os << "normal: " << str(this->_normal) << ","  << std::endl;
-        os << "radius: " << this->_radius << ","  << std::endl;
-        os << "color: " << str(this->_color) << ","  << std::endl;
-        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "- Disc: {";
+        os << str(this->_position) << ";";
+        os << str(this->_normal) << ";";
+        os << this->_radius << ";";
+        os << str(this->_color) << ";";
+        os << this->_reflectivity << ";";
         os << "}" << std::endl;
     }
     V3 normal(const V3 &point) const override {
@@ -161,14 +185,24 @@ public:
         V3 cap_normal = unit(base - position);
         this->_cap = Disc(base, cap_normal, radius, colour, reflectivity);
     }
+    Cone(std::string construction) {
+        auto params = explode(construction, ';');
+        this->_position = V3(params[0]);
+        this->_base = V3(params[1]);
+        this->_radius = stod(params[2]);
+        this->_color = RGB(params[3]);
+        this->_reflectivity = stod(params[4]);
+        V3 cap_normal = unit(_base - _position);
+        this->_cap = Disc(_base, cap_normal, _radius, _color, _reflectivity);
+    }
     ~Cone() = default;
     void serialize(std::ostream &os) const override {
-        os << "- Cone: {" << std::endl;
-        os << "position: " << str(this->_position) << ","  << std::endl;
-        os << "base: " << str(this->_base) << ","  << std::endl;
-        os << "radius: " << this->_radius << ","  << std::endl;
-        os << "color: " << str(this->_color) << ","  << std::endl;
-        os << "reflectivity: " << this->_reflectivity << ","  << std::endl;
+        os << "- Cone: {";
+        os << str(this->_position) << ";";
+        os << str(this->_base) << ";";
+        os << this->_radius << ";";
+        os << str(this->_color) << ";";
+        os << this->_reflectivity << ";";
         os << "}" << std::endl;
     }
     V3 normal(const V3 &point) const override {

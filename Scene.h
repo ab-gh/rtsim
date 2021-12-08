@@ -69,21 +69,21 @@ public:
                     std::string s = " -";
                     type.erase(0, s.length());
 
+                    std::string construction = line.erase(0, line.find(":")+3);
                     switch (hash(type)) {
                         case _InfinitePlane:
-                            std::cout << "InfinitePlane" << std::endl;
+                            this->addObject(new InfinitePlane(construction));
                             break;
                         case _Sphere:
-                            std::cout << "Sphere" << std::endl;
+                            this->addObject(new Sphere(construction));
                             break;
                         case _Cone:
-                            std::cout << "Cone" << std::endl;
+                            this->addObject(new Cone(construction));
                             break;
                         case _Disc:
-                            std::cout << "Disc" << std::endl;
+                            this->addObject(new Disc(construction));
                             break;
                     }
-
                 }
             }
             if (line == "sources:") {
@@ -91,10 +91,8 @@ public:
                     if (line == "EOF:") {
                         break;
                     }
-                    //Source* source = new Source();
-                    //source->deserialize(line);
-                    //this->_sources.push_back(source);
-                    std::cout << "source" << std::endl;
+                    std::string construction = line.erase(0, line.find(":")+3);
+                    this->addSource(new Source(construction));
                 }
             }
         }
