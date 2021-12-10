@@ -6,15 +6,19 @@
 class Camera {
 public:
     Camera() {
+        // Outputted image (image space)
         this->aspect_ratio = 16.0/9.0;
         this->image_width = 1000;
         this->image_height = static_cast<int>(this->image_width / this->aspect_ratio);
 
+        // "Camera sensor" (scene space)
         this->viewport_height = 2.0;
         this->viewport_width = this->viewport_height * this->aspect_ratio;
 
+        // Distance "eye" is behind viewport
         this->focal_length = 1.0;
 
+        // Viewport position
         this->origin = P3(0.0, 0.0, 0.0);
         this->horizontal = V3(this->viewport_width, 0.0, 0.0);
         this->vertical = V3(0.0, this->viewport_height, 0.0);

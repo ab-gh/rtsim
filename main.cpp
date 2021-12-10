@@ -1,5 +1,4 @@
 #include <string>
-#include <cmath>
 #include "Render.h"
 #include "Camera.h"
 #include "Vector.h"

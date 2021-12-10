@@ -8,11 +8,17 @@
 
 class Object {
 public:
+    // Default constructor
     Object() = default;
+    // Deserialization constructor
     Object(std::string);
+    // Mark as virtual to force abstract class
     virtual ~Object() = default;
+    // Intersection function
     virtual std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const = 0;
+    // Normal function
     virtual V3 normal(const V3 &point) const = 0;
+    // Serializer
     virtual void serialize(std::ostream &os) const = 0;
 public:
     V3 _position;
@@ -20,6 +26,10 @@ public:
     double _reflectivity;
 };
 // Sphere
+// _position: Position of the center of the sphere
+// _radius: Radius of the sphere
+// _color: Color of the sphere
+// _reflectivity: Reflectivity of the sphere
 class Sphere : public Object {
 private:
     double _radius;
@@ -51,6 +61,7 @@ public:
     }
     std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const override {
         V3 oc = ray.origin() - _position;
+        // Construct quadratic equation
         auto a = dot(ray.direction(), ray.direction());
         auto b_div_2 = dot(oc, ray.direction());
         auto c = powf(oc.length(), 2) - _radius * _radius;
@@ -61,6 +72,7 @@ public:
         } else {
             auto sqrt_discriminant = sqrt(discriminant);
             auto root = (-b_div_2 - sqrt_discriminant) / a;
+            // Min max are currently unused
             if (root < min || max < root) {
                 root = (-b_div_2 + sqrt_discriminant) / a;
                 if (root < min || max < root) {
@@ -71,10 +83,13 @@ public:
             return std::make_pair( root, this);
         }
     }
-
 };
 
 // Infinite Plane
+// _position: Position of the plane (can be any point on the plane)
+// _normal: Normal of the plane (defines "direction" of the plane)
+// _color: Color of the plane
+// _reflectivity: Reflectivity of the plane
 class InfinitePlane : public Object {
 protected:
     V3 _normal;
@@ -105,7 +120,6 @@ public:
     V3 normal(const V3 &point) const override {
         return _normal;
     }
-
     std::pair<double, const Object*> intersect(const Ray &ray, double min, double max) const override {
         auto denom = dot(unit(ray.direction()), unit(_normal));
         auto dist = dot(_position - ray.origin(), unit(_normal)) / denom;
@@ -116,6 +130,12 @@ public:
     }
 };
 
+// Disc
+// _position: Position of the center of the disc
+// _normal: Normal of the disc (defines "direction" of the disc)
+// _radius: Radius of the disc
+// _color: Color of the disc
+// _reflectivity: Reflectivity of the disc
 class Disc : public InfinitePlane {
 private:
     double _radius;
@@ -160,7 +180,7 @@ public:
             V3 v = p - _position;
             auto d2 = dot(v, v);
             if (d2 <= pow(_radius, 2)) {
-                // Iniside the radius
+                // Inside the radius
                 return std::make_pair( (dist), this);
             } else {
                 // Outside the radius
@@ -169,7 +189,14 @@ public:
         }
     }
 };
+
 // Cone
+// _position: Position of the apex of the cone (the tip)
+// _normal: Center point of the cone's circular base
+// _radius: Radius of the cone's circular base
+// _color: Color of the cone
+// _reflectivity: Reflectivity of the cone
+// _cap: The circular cap at the end of the cone (linked to a Disc)
 class Cone : public Object {
 private:
     V3 _base;
@@ -225,6 +252,7 @@ public:
         V3 w = ray.origin() - _position;
         auto m = powf(_radius, 2) / powf(H.length(), 2);
 
+        // Construct the quadratic equation
         auto a = dot(v,v) - (m * pow(dot(v, hhat), 2)) - pow(dot(v, hhat), 2);
         auto b = 2 * (dot(v,w) - (m * dot(v, hhat) * dot(w, hhat) )- (dot(v, hhat) * dot(w, hhat) ));
         auto c = dot(w,w) - (m*pow(dot(w, hhat), 2)) - pow(dot(w, hhat), 2);
@@ -238,9 +266,10 @@ public:
             return std::make_pair( -1.0, this);
         } else if (discriminant == 0) {
             if (dotvh != cosalpha) {
+                // Normal hit
                 root = -(b / (2 * a));
             } else {
-                // Infinite hits, so assume none
+                // Ray is tangent to the cone
                 return std::make_pair( root, this);
             }
         } else if (discriminant > 0) {
@@ -248,13 +277,13 @@ public:
             auto root2 = (-b - sqrt(discriminant)) / (2 * a);
             if (root1 < root2) {
                 root = root1;
-                otherroot = root2;
             } else {
                 root = root2;
-                otherroot = root1;
             }
         }
+        // Point of intersection ray
         auto Lint = ray.origin() + (root * unit(ray.direction()));
+        // Test if the point has hit the base cap
         auto intersect_test = dot((Lint - _position), hhat);
         if (intersect_test > H.length()) {
             return _cap.intersect(ray, min, max);

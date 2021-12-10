@@ -57,7 +57,7 @@ double diffuse(V3 normal_ray, V3 source_ray) {
     return light_intensity;
 }
 
-// Reflected light
+// Reflected light recursion
 RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_color, int recursion_depth) {
     Ray reflected_ray(reflection_point, reflection_ray);
     auto hit_list = hitList(reflected_ray, scene);
@@ -75,7 +75,7 @@ RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_col
             // Recursive call
             return intensity(scene, reflected_ray, pixel_color, recursion_depth - 1);
         } else {
-            // Return black
+            // Return no reflections
             return pixel_color;
         }
     } else {
@@ -83,6 +83,7 @@ RGB reflected(V3 reflection_ray, P3 reflection_point, Scene scene, RGB pixel_col
     }
 }
 
+// Progress indicator
 void progress(int j, double height) {
     double percent = fabs((j-height) / height) * 100;
     int p = static_cast<int>(percent);
@@ -143,16 +144,12 @@ void render(Camera cam, Scene scene, int recursion_depth) {
         progress(j, cam.image_height);
         for (int i = 0; i < cam.image_width; ++i) {
             // Rendering
-            // TODO: refactor
-            auto u = double(i) / double(cam.image_width-1);
-            auto v = double(j) / double(cam.image_height-1);
-            // Construct ray
-            Ray r(cam.origin, cam.lower_left_corner + u * cam.horizontal + v * cam.vertical - cam.origin);
+            // Construct ray from bottom left corner of image up to the current i,j
+            Ray r(cam.origin, cam.lower_left_corner + (double(i) / double(cam.image_width-1)) * cam.horizontal + (double(j) / double(cam.image_height-1)) * cam.vertical - cam.origin);
             // Find the closest object
             RGB pixel_color = intensity(scene, r, RGB(0, 0, 0), recursion_depth);
             // Clamp and write colour
             write_RGB(output, pixel_color);
-
         }
     }
     output.close();

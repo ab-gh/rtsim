@@ -109,10 +109,6 @@ inline double dot(const Vector &u, const Vector &v) {
     return u.x() * v.x() + u.y() * v.y() + u.z() * v.z();
 }
 
-inline Vector cross(const Vector &u, const Vector &v) {
-    return {u.y() * v.z() - u.z() * v.y(), u.z() * v.x() - u.x() * v.z(), u.x() * v.y() - u.y() * v.x()};
-}
-
 inline Vector unit(Vector u) {
     return u / u.length();
 }
@@ -121,6 +117,7 @@ inline Vector reflect(const Vector &i, const Vector &n) {
     return i - 2 * dot(i, n) * n;
 }
 
+// Currently unused
 inline Vector refract(const Vector &i, const Vector &n, double eta) {
     auto cos_theta = fmin(dot(-i, n), 1.0);
     Vector out_perp = eta * (i + cos_theta * n);
