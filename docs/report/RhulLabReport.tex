@@ -175,7 +175,6 @@ The final - and by far the most complex - requirement for the project is the ``r
 \begin{figure}[!h]
 \centering
 \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
-
 \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
 %uncomment if require: \path (0,533); %set diagram left start at 0, and has height of 533
 
@@ -297,8 +296,60 @@ When the \verb|render()| function is called, and is passed a valid scene and cam
   \item Write the pixel's RGB values out to the i
   mage file.
 \end{enumerate}
+To generate each ``sight'' ray, the renderer creates vectors from the lower-left corner of the viewport along the $x$ and $y$ axis to the pixel. As the renderer also knows the vector from the origin to the eye, and the origin to the lower-left corner, it can construct a vector from the eye to the pixel. That vector is then used to define the sight ray's direction, and the eye is used as the origin. This is shown below in Figure 3.
 
-% focus on viewport and render %
+\begin{figure}[!h]
+  \centering
+
+
+
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+  
+  %Straight Lines [id:da17863768780114508] 
+  \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]  [dash pattern={on 5.63pt off 4.5pt}]  (165.41,140.41) -- (606.93,25.28) ;
+  \draw [shift={(609.83,24.52)}, rotate = 165.38] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
+  %Shape: Trapezoid [id:dp1174799712357697] 
+  \draw   (399.83,240) -- (282.83,212.7) -- (282.83,68.82) -- (399.83,41.52) -- cycle ;
+  %Shape: Circle [id:dp4165673384186185] 
+  \draw   (154,140.41) .. controls (154,134.11) and (159.11,129) .. (165.41,129) .. controls (171.72,129) and (176.83,134.11) .. (176.83,140.41) .. controls (176.83,146.72) and (171.72,151.83) .. (165.41,151.83) .. controls (159.11,151.83) and (154,146.72) .. (154,140.41) -- cycle ;
+  %Straight Lines [id:da432002112670936] 
+  \draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (399.83,240) -- (399.83,80.52) ;
+  \draw [shift={(399.83,77.52)}, rotate = 90] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
+  %Straight Lines [id:da05467739122704984] 
+  \draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][line width=1.5]    (399.83,79.52) -- (316.74,100.78) ;
+  \draw [shift={(313.83,101.52)}, rotate = 345.65] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
+  %Straight Lines [id:da47810184486321394] 
+  \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=0.75]    (165.41,140.41) -- (247.99,175.49) -- (258.26,179.86) -- (397.99,239.22) ;
+  \draw [shift={(399.83,240)}, rotate = 203.02] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+  %Straight Lines [id:da4173517014748004] 
+  \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (165.41,140.41) -- (310.93,102.28) ;
+  \draw [shift={(313.83,101.52)}, rotate = 165.32] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
+  %Straight Lines [id:da16705319100986238] 
+  \draw    (140.83,139.52) -- (180.83,119.52) ;
+  %Straight Lines [id:da36157748840388426] 
+  \draw    (140.83,139.52) -- (178.83,161.52) ;
+  \draw  [line width=1.5]  (308.26,96.05) -- (321.41,105.06)(319.15,94.25) -- (310.51,106.85) ;
+  
+  % Text Node
+  \draw (122,112) node [anchor=north west][inner sep=0.75pt]   [align=left] {Eye};
+  % Text Node
+  \draw (367,246) node [anchor=north west][inner sep=0.75pt]   [align=left] {Lower left corner};
+  % Text Node
+  \draw (431,30) node [anchor=north west][inner sep=0.75pt]   [align=left] {Sight Ray};
+  % Text Node
+  \draw (296.94,43.65) node [anchor=north west][inner sep=0.75pt]  [rotate=-345.48] [align=left] {Viewport};
+  
+  
+  \end{tikzpicture}
+  
+  
+\caption{Diagram showing how each sight ray is constructed.}
+\end{figure}
+
+
 
 \begin{appendix}
 \end{appendix}

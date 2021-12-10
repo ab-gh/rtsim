@@ -129,7 +129,7 @@ RGB intensity(Scene scene, Ray r, RGB pixel_color, int recursion_depth) {
     }
     return pixel_color;
 }
-
+t
 void render(Camera cam, Scene scene, int recursion_depth) {
     // Open ppm file
     ofstream output;
