@@ -13,6 +13,7 @@
 \usepackage{bm}
 \usepackage{amsfonts}
 \usepackage{circuitikz}
+\usepackage{multicol}
 \newcommand{\secref}[1]{\autoref{#1}. \nameref{#1}}
 
 \usepackage[a4paper, total={6in, 8in}]{geometry}
@@ -96,25 +97,7 @@ This project required a lot of different components to work together accurately,
 This section explains the implementation of the ray tracing simulator, following the process outline in the milestones above.
 
 \subsection{Vector base class}
-The first task of the implementation was to construct a fully-featured vector class. Defined in \verb|Vector.h|, the \verb|Vector| class serves as the basis for almost every other element of the simulator. As such, it defines an extensive list of methods and operations for vectors.
-% dont need all of these vector sections %
-
-\begin{lstlisting}[language=C++, belowskip=-0.8 \baselineskip]
-class Vector {
-  private:
-      double vector[3];
-  public:
-      Vector() : vector{0, 0, 0} {};
-      Vector(double x, double y, double z) : vector{x, y, z} {};
-      ...
-  };
-\end{lstlisting}Operations for vectors are also defined outside of the \verb|Vector| class, as inline functions, so that they can be accessed outside of a Vector:
-\begin{lstlisting}[language=C++, belowskip=-0.8 \baselineskip]
-inline Vector operator+(const Vector &u, const Vector &v) {
-    return {u.x() + v.x(), u.y() + v.y(), u.z() + v.z()};
-}
-...
-\end{lstlisting}In addition to the basic mathematical operations, the header file defines the dot and cross product (\verb|dot(u,v)|, \verb|cross(u,v)|), unit vector (\verb|unit(u)|), as well as reflections (\verb|reflect(i,n)|) and refractions (\verb|refract(i,n,eta)|). The \verb|Vector| class also has three aliases, which help to make their specific use clearer in context: \verb|V3|, \verb|P3|, \verb|RGB|.
+The first task of the implementation was to construct a fully-featured vector class. Defined in \verb|Vector.h|, the \verb|Vector| class serves as the basis for almost every other element of the simulator. As such, it defines an extensive list of methods and operations for vectors. Operations for vectors are also defined outside of the \verb|Vector| class, as inline functions, so that they can be accessed outside of a Vector. In addition to the basic mathematical operations, the header file defines the dot and cross product (\verb|dot(u,v)|, \verb|cross(u,v)|), unit vector (\verb|unit(u)|), as well as reflections (\verb|reflect(i,n)|) and refractions (\verb|refract(i,n,eta)|). The \verb|Vector| class also has three aliases, which help to make their specific use clearer in context: \verb|V3|, \verb|P3|, \verb|RGB|.
 
 RGB vectors have their own class definition, \verb|RGB.h|. These force the values to be ``clamped'' between 0 and 255 when output, and provide a \verb|write_RGB| function to write an RGB value out to a file.
 
@@ -133,6 +116,7 @@ With a class now defined to hold objects in a world, the next step was to define
 \verb|Object.h| defines several different objects to choose from, as well as an abstract base class used to build the other objects. \verb|Object| class defines the functions needed for an object: a parameter constructor, a string constructor (used to deserialize information when calling \verb|Scene.read()|), an intersection function, a normal function, and a serializer (for \verb|Scene.save()|). One feature of note is the return type of the \verb|Object.intersect()| function. This function returns a pair \verb|std::pair<double, const Object*>|, where the double is the unit direction multiplier of the ray's intersection point. While it may seem redundant to return the object that has been intersected, this allows complex objects to be created with ``sub-objects''. For instance, the \verb|Cone| object is comprised of an ``empty'' cone, with a base cap, which is actually a \verb|Disc| sub-object.
 
 This project currently implements the following shapes:
+\begin{multicols}{2}
 \begin{itemize}
   \item \verb|Sphere|
   \begin{itemize}
@@ -148,6 +132,8 @@ This project currently implements the following shapes:
     \item \verb|Vector| colour
     \item \verb|double| reflectivity
   \end{itemize}
+  \vfill\null
+  \columnbreak
   \item \verb|Disc|
   \begin{itemize}
     \item \verb|Vector| position
@@ -165,12 +151,13 @@ This project currently implements the following shapes:
     \item \verb|double| reflectivity
   \end{itemize}
 \end{itemize}
+\end{multicols}
 
 \subsection{Sources and intensity}
 Now that objects can be defined, light sources need to be provided to allow them to be illuminated. These are defined in \verb|Source.h|, which defines a \verb|Source| class. This requires a position and intensity, and provides a deserialization constructor and a serializer. While only invisible point-sources are defined, it would be easy to extend this class to create visible sources (i.e. emissive objects) with intersection and normal functions, or different light sources such as a ``sun'' (i.e. a source at infinity with parallel light rays) or a directional light (i.e. a source which only provides illumination at some solid angle). 
 
 \subsection{Rendering and Image Generation}
-The final - and by far the most complex - requirement for the project is the ``rendering engine''. This is defined in \verb|Render.h| and, while not a class, defines a multitude of functions. Below is a simple flowchart describing the operation of the rendering engine.
+The final - and by far the most complex - requirement for the project is the ``rendering engine''. This is defined in \verb|Render.h| and, while not a class, defines a multitude of functions. Figure 2 shows a simple flowchart describing the operation of the rendering engine.
 
 \begin{figure}[!h]
 \centering
@@ -293,8 +280,7 @@ When the \verb|render()| function is called, and is passed a valid scene and cam
     \item Specular illumination, by taking the dot product of the vector from the intersection point to the source, with the reflected ray around the surface normal at the intersection point.
     \item Reflective illumination, by taking the reflected ray around the surface normal at the intersection point, and treating that as a new sight ray, projecting it into the scene, and going to step 2.
   \end{itemize}
-  \item Write the pixel's RGB values out to the i
-  mage file.
+  \item Write the pixel's RGB values out to the image file.
 \end{enumerate}
 To generate each ``sight'' ray, the renderer creates vectors from the lower-left corner of the viewport along the $x$ and $y$ axis to the pixel. As the renderer also knows the vector from the origin to the eye, and the origin to the lower-left corner, it can construct a vector from the eye to the pixel. That vector is then used to define the sight ray's direction, and the eye is used as the origin. This is shown below in Figure 3.
 
@@ -345,14 +331,35 @@ To generate each ``sight'' ray, the renderer creates vectors from the lower-left
   
   \end{tikzpicture}
   
-  
 \caption{Diagram showing how each sight ray is constructed.}
 \end{figure}
 
-
-
+\subsection{Main and demonstration}
+The final piece of the puzzle is the contents of \verb|main.cpp|. To successfully construct a scene and output an image, the user needs to include all the headers, create a camera and a scene, add objects to the scene or load a scene file, and call the \verb|render(camera, scene, depth)| function. The default \verb|main.cpp| file included with this project will generate a scene demonstrating all of the features of the project, by loading in a basic empty room, adding two spheres, a cone, and a source. The code may take a few minutes to run, and will output the image as \verb|~cmake-build-debug/image.ppm|, but hopefully the output will be worthwhile:
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/demo.png}
+  \caption{Demonstration image of a ray-tracing scene, produced by this project.}
+\end{figure}
+\section{Conclusion and Future Ideas}
+In conclusion, I believe that this project fulfills or succeeds the requirements set out by the script. By closely following OOD methodology, the project is easily broken down and understood, and is flexible and can be easily updated. As I enjoyed this project greatly, I have a few ideas of features and improvements I'd like to implement in the future:
+\begin{itemize}
+  \item Allow parameters for the initialization of the \verb|Camera| class, allowing for a ``free camera'' to be positioned anywhere in the scene.
+  \item Creating visible light sources, and emissive objects, and other types of light sources (such as directional, sunlight or softbox).
+  \item Creating transparency/translucency parameters for objects, and implementing ray refraction. The \verb|Vector.refract| method already exists for this, but is currently unused.
+  \item Adding shadows, depth of field, and other features mentioned in the \verb|README.md| roadmap.
+\end{itemize}
 \begin{appendix}
+  \section{One more thing...}
+  \newpage
+  \vfill\null
+  \begin{figure}[!h]
+    \centering
+    \makebox[\textwidth]{\includegraphics[width=1.2\textwidth]{images/not_so_easter_easter_egg.png}}
+    \caption{Merry Christmas and a Happy New Year! (Image code provided in {\it snowman.cpp}).}
+  \end{figure}
 \end{appendix}
+
 
 
 \end{document}
