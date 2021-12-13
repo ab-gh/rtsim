@@ -63,24 +63,24 @@ To start the project, I set out a series of objectives for the final code, and a
   \item{Simulate the object's interactions with the light sources and other objects in the scene using {\it reverse ray tracing}.}
   \item{Produce an image of the simulated scene, as if a camera was taking a photograph.}
 \end{itemize}
-To achieve these aims, I set out to complete the following milestones, roughly in order. By breaking the project down into smaller components, I not only ensure that I don't waste time working on one feature when an underlying feature is broken, but also lend my code-writing process to Object Oriented Design (OOD) principles.
+To achieve these aims, I set out to complete the following milestones, roughly in order. By breaking the project down into smaller components, I not only ensured that I didn't waste time working on one feature when an underlying feature was broken, but also applied my code-writing process to Object Oriented Design (OOD) principles.
 \begin{enumerate}
   \item{Construct a fully-functional but abstract Vector data type, capable of defining vectors and points in 3D cartesian space, and computing all relevant vector operations.}
   \item{Construct a ``virtual camera'', which sends rays out into the ``world''.}
-  \item{Define primative objects, classes which contain the object's geometry and properties, as well as functions to calculate the intersections between its self and a camera ray, and a function to calculate the surface normal of the shape at any point.}
+  \item{Define primative objects, classes which contain the object's geometry and properties, as well as functions to calculate the intersections between itself and a camera ray, and a function to calculate the surface normal of the shape at any point.}
   \item{Define light sources, with an intensity and position.}
   \item{Construct a ``rendering engine'', capable of simulating various types of illumination, and linking the virtual camera to the ``world'' (scene) of objects in front of it.}
 \end{enumerate}
 \subsection{Ray Tracing Theory}
-To produce a realistic depiction of the scene, this project uses a technique called {\it reverse ray tracing}. In a real physical scene, the illumination of objects can be approximated as light sources emitting rays which interact with the object, reflecting light to a new ray direction. If one of these light rays, after however many reflections, hits a sensor (be it an eye or camera), it is ``seen'' by the observer. In a computational simulation, a tiny fraction of the rays emitted from a source will actually make it to the observer, so this process is very inefficient.
+To produce a realistic depiction of the scene, this project uses a technique called {\it reverse ray tracing}. In a real physical scene, the illumination of objects can be approximated as light sources emitting rays which interact with the object, reflecting light to a new ray direction. If one of these light rays, after any number of reflections, hits a sensor (be it an eye or camera), it is ``seen'' by the observer. In a computational simulation, a tiny fraction of the rays emitted from a source will actually make it to the observer, so this process is very inefficient.
 
-To combat this, {\it reverse} ray tracing is used, with the same principles, except the observer emits a ``sight'' ray, which reflects according to the same laws, until it hits a light source. To produce the image, the observer ``looks'' through a viewport - a rectangular boundary in space - similarly to a camera sensor. Sight rays are constructed with a vector from an ``eye'' (focus of the observation plane) to each pixel on the viewport, which is then projected into the scene, and the reverse ray tracing begins.
+To combat this, {\it reverse} ray tracing is used, with the same principles, except the observer emits a ``sight'' ray, which reflects according to the same laws, until it hits a light source. To produce the image, the observer ``looks'' through a viewport - a rectangular boundary in space - similar to a camera sensor. Sight rays are constructed with a vector from an ``eye'' (focus of the observation plane) to each pixel on the viewport, which is then projected into the scene, and the reverse ray tracing begins.
 
 \begin{figure}[!h]
   \centering
   \begin{circuitikz}
     \draw [line width=0.5mm] (0,0) node {} -- (0,3) node[pos=1,above] {viewport};
-    \draw (5,0) circle (1cm);
+    \draw (5,0) circle (1cm) node {object};
     \draw[fill=black] (-2,1.5) circle (0.1cm);
     \draw[fill=yellow] (3,2.9) circle (0.1cm);
     \draw (-2,1.5) node[above left=of eye] {eye} to node[currarrow] {} (4.2,0.6);
@@ -91,7 +91,7 @@ To combat this, {\it reverse} ray tracing is used, with the same principles, exc
 \end{figure}
 
 \subsection{Object Oriented Design}
-This project required a lot of different components to work together accurately, yet still abstract enough to be flexible, allowing the development of more shapes, interactions, and materials in future. Because of this, applying the principles of Object Oriented Design was essential. Each component of the project was ``compartmentalized'' in its own header file, using inheritance where possible. Each class interacts with the renderer, which produces the final image.
+This project required a lot of different components to work together accurately, yet still abstract enough to be flexible, allowing the development of more shapes, interactions, and materials in future. Because of this, applying the principles of Object Oriented Design was essential. Each component of the project was ``compartmentalised'' in its own header file, using inheritance where possible. Each class interacts with the renderer, which produces the final image.
 
 \section{Implementation}
 This section explains the implementation of the ray tracing simulator, following the process outline in the milestones above.
@@ -294,6 +294,9 @@ To generate each ``sight'' ray, the renderer creates vectors from the lower-left
   \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
   %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
   
+  %Straight Lines [id:da4173517014748004] 
+  \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (165.41,140.41) -- (310.93,102.28) ;
+  \draw [shift={(313.83,101.52)}, rotate = 165.32] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
   %Straight Lines [id:da17863768780114508] 
   \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]  [dash pattern={on 5.63pt off 4.5pt}]  (165.41,140.41) -- (606.93,25.28) ;
   \draw [shift={(609.83,24.52)}, rotate = 165.38] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
@@ -302,17 +305,14 @@ To generate each ``sight'' ray, the renderer creates vectors from the lower-left
   %Shape: Circle [id:dp4165673384186185] 
   \draw   (154,140.41) .. controls (154,134.11) and (159.11,129) .. (165.41,129) .. controls (171.72,129) and (176.83,134.11) .. (176.83,140.41) .. controls (176.83,146.72) and (171.72,151.83) .. (165.41,151.83) .. controls (159.11,151.83) and (154,146.72) .. (154,140.41) -- cycle ;
   %Straight Lines [id:da432002112670936] 
-  \draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (399.83,240) -- (399.83,80.52) ;
-  \draw [shift={(399.83,77.52)}, rotate = 90] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
+  \draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (282.83,212.7) -- (282.83,110.52) ;
+  \draw [shift={(282.83,107.52)}, rotate = 90] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
   %Straight Lines [id:da05467739122704984] 
-  \draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][line width=1.5]    (399.83,79.52) -- (316.74,100.78) ;
-  \draw [shift={(313.83,101.52)}, rotate = 345.65] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
+  \draw [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][line width=1.5]    (282.58,109.62) -- (310.92,102.27) ;
+  \draw [shift={(313.83,101.52)}, rotate = 165.46] [color={rgb, 255:red, 74; green, 144; blue, 226 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
   %Straight Lines [id:da47810184486321394] 
   \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=0.75]    (165.41,140.41) -- (247.99,175.49) -- (258.26,179.86) -- (397.99,239.22) ;
   \draw [shift={(399.83,240)}, rotate = 203.02] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
-  %Straight Lines [id:da4173517014748004] 
-  \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (165.41,140.41) -- (310.93,102.28) ;
-  \draw [shift={(313.83,101.52)}, rotate = 165.32] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=1.5]    (14.21,-4.28) .. controls (9.04,-1.82) and (4.3,-0.39) .. (0,0) .. controls (4.3,0.39) and (9.04,1.82) .. (14.21,4.28)   ;
   %Straight Lines [id:da16705319100986238] 
   \draw    (140.83,139.52) -- (180.83,119.52) ;
   %Straight Lines [id:da36157748840388426] 
@@ -322,14 +322,14 @@ To generate each ``sight'' ray, the renderer creates vectors from the lower-left
   % Text Node
   \draw (122,112) node [anchor=north west][inner sep=0.75pt]   [align=left] {Eye};
   % Text Node
-  \draw (367,246) node [anchor=north west][inner sep=0.75pt]   [align=left] {Lower left corner};
+  \draw (171,220) node [anchor=north west][inner sep=0.75pt]   [align=left] {Lower left corner};
   % Text Node
   \draw (431,30) node [anchor=north west][inner sep=0.75pt]   [align=left] {Sight Ray};
   % Text Node
   \draw (296.94,43.65) node [anchor=north west][inner sep=0.75pt]  [rotate=-345.48] [align=left] {Viewport};
   
   
-  \end{tikzpicture}
+  \end{tikzpicture}  
   
 \caption{Diagram showing how each sight ray is constructed.}
 \end{figure}
